@@ -1,0 +1,471 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>같은 장면, 다른 마음</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<style>
+/* Layout: a single centered "stage" column; each character is a colored lens the student looks through */
+:root{
+  --bg:#F2F5FA; --surface:#FFFFFF; --ink:#1D2740; --muted:#5D6880; --line:#D9DFEA;
+  --accent:#3B5BDB; --accent-ink:#FFFFFF;
+  --c0:#F0857A; --c0-soft:#FDE6E3;
+  --c1:#4DA3E0; --c1-soft:#E0F0FB;
+  --c2:#5DB87F; --c2-soft:#E2F4E8;
+  --display:"Jua","Gowun Dodum",system-ui,sans-serif;
+  --body:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --r:18px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141A28; --surface:#1E2638; --ink:#EEF1F8; --muted:#A3ADC2; --line:#323C52;
+  --accent:#7D96F5; --accent-ink:#0F1524;
+  --c0:#F29A90; --c0-soft:#3D2A2C; --c1:#6DB6EA; --c1-soft:#22344A; --c2:#77C995; --c2-soft:#233A2E;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141A28; --surface:#1E2638; --ink:#EEF1F8; --muted:#A3ADC2; --line:#323C52;
+  --accent:#7D96F5; --accent-ink:#0F1524;
+  --c0:#F29A90; --c0-soft:#3D2A2C; --c1:#6DB6EA; --c1-soft:#22344A; --c2:#77C995; --c2-soft:#233A2E;
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:18px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+#app{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance;line-height:1.3}
+h1{font-size:clamp(34px,7vw,52px)}
+h2{font-size:clamp(24px,4.5vw,32px)}
+h3{font-size:22px}
+p{margin:0}
+.muted{color:var(--muted)}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{font-family:var(--display);font-size:20px;display:flex;align-items:center;gap:8px}
+.dots{display:inline-flex}
+.dots i{width:14px;height:14px;border-radius:50%;display:block;margin-left:-4px;opacity:.9}
+.dots i:nth-child(1){background:var(--c0);margin-left:0}.dots i:nth-child(2){background:var(--c1)}.dots i:nth-child(3){background:var(--c2)}
+button{font:inherit;cursor:pointer;border:none;border-radius:999px;min-height:48px;padding:10px 22px;transition:transform .12s ease,background .12s}
+button:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+button:active{transform:scale(.97)}
+.btn{background:var(--accent);color:var(--accent-ink);font-family:var(--display);font-size:20px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.ghost{background:transparent;color:var(--ink);border:2px solid var(--line)}
+.icon-btn{background:var(--surface);color:var(--ink);border:2px solid var(--line);min-height:44px;padding:6px 16px;font-size:16px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.row.end{justify-content:flex-end}
+.row.between{justify-content:space-between}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:22px;display:flex;flex-direction:column;gap:14px}
+textarea,input[type=text]{font:inherit;width:100%;border:2px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--bg);color:var(--ink);resize:vertical}
+textarea{min-height:84px}
+label.q{font-family:var(--display);font-size:20px}
+
+/* hero */
+.hero{display:grid;gap:22px;padding-block:24px 8px}
+.lenses{position:relative;height:150px;max-width:340px}
+.lenses span{position:absolute;top:10px;width:130px;height:130px;border-radius:50%;mix-blend-mode:multiply;opacity:.85}
+:root[data-theme="dark"] .lenses span{mix-blend-mode:screen}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .lenses span{mix-blend-mode:screen}}
+.lenses span:nth-child(1){left:0;background:var(--c0)}
+.lenses span:nth-child(2){left:95px;background:var(--c1)}
+.lenses span:nth-child(3){left:190px;background:var(--c2)}
+.lenses b{position:absolute;left:150px;top:62px;font-family:var(--display);font-size:22px;color:var(--ink)}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;padding:0;margin:0;list-style:none;counter-reset:s}
+.steps li{counter-increment:s;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-size:16px}
+.steps li::before{content:counter(s);font-family:var(--display);color:var(--accent);font-size:22px;display:block}
+
+/* scene list */
+.scenes{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.scene-card{text-align:left;background:var(--surface);color:var(--ink);border:2px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:10px;min-height:150px}
+.scene-card:hover{border-color:var(--accent)}
+.scene-card .who{font-size:28px;letter-spacing:4px}
+.scene-card .t{font-family:var(--display);font-size:21px;line-height:1.35}
+.tag{font-size:13px;color:var(--muted);letter-spacing:.04em}
+
+/* stage */
+.stage{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:24px;display:flex;flex-direction:column;gap:16px}
+.cast{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.actor{border-radius:14px;padding:12px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px}
+.actor .e{font-size:36px;line-height:1.2}
+.actor .n{font-family:var(--display);font-size:19px}
+.actor .r{font-size:14px;color:var(--muted)}
+.situation{font-size:20px;line-height:1.7}
+
+/* progress */
+.progress{display:flex;gap:6px}
+.progress i{flex:1;height:8px;border-radius:99px;background:var(--line)}
+.progress i.on{background:var(--accent)}
+
+/* perspective */
+.lens-head{border-radius:var(--r);padding:20px;display:flex;gap:16px;align-items:center}
+.lens-head .e{font-size:54px;width:84px;height:84px;border-radius:50%;display:grid;place-items:center;background:var(--surface);flex:none}
+.lens-head .say{font-size:15px;color:var(--muted)}
+.emotions{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
+.emo{background:var(--bg);color:var(--ink);border:2px solid var(--line);border-radius:14px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:16px;min-height:72px}
+.emo .f{font-size:26px;line-height:1.1}
+.emo[aria-pressed="true"]{border-color:var(--ink);background:var(--surface);box-shadow:0 0 0 2px var(--ink) inset}
+.intensity{display:flex;flex-direction:column;gap:8px}
+.int-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.int-row strong{min-width:80px}
+.seg{display:inline-flex;border:2px solid var(--line);border-radius:999px;overflow:hidden}
+.seg button{border-radius:0;min-height:40px;padding:4px 16px;background:transparent;color:var(--ink);font-size:15px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.bubble{position:relative;border-radius:18px;padding:4px}
+.bubble-prefix{font-family:var(--display);font-size:18px;margin-bottom:6px;display:block}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:var(--bg);color:var(--ink);border:2px solid var(--line);min-height:42px;padding:6px 14px;font-size:16px}
+.chip[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+
+/* compare */
+.compare{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:680px){.compare{grid-template-columns:1fr}.cast .r{display:none}}
+.cmp{border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.cmp .hd{display:flex;align-items:center;gap:10px}
+.cmp .hd .e{font-size:32px}
+.cmp .feel{display:flex;flex-wrap:wrap;gap:6px}
+.pill{background:var(--surface);border-radius:999px;padding:3px 12px;font-size:15px}
+.speech{background:var(--surface);border-radius:14px;padding:10px 12px;font-size:16px;overflow-wrap:anywhere}
+.hidden-story{border-top:2px dashed currentColor;padding-top:10px;font-size:15px;color:var(--ink)}
+.reveal{background:var(--surface);color:var(--ink);border:2px dashed var(--line);min-height:42px;font-size:15px;padding:6px 12px}
+.label{font-size:13px;color:var(--muted);letter-spacing:.06em}
+
+/* records */
+.rec{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.rec summary{cursor:pointer;font-family:var(--display);font-size:19px}
+.rec-body{display:flex;flex-direction:column;gap:6px;font-size:16px;padding-top:8px}
+
+/* settings */
+.switch{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.switch:last-child{border-bottom:none}
+.switch input{width:26px;height:26px;accent-color:var(--accent);flex:none}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.notice{font-size:15px;background:var(--bg);border-radius:12px;padding:10px 14px;color:var(--muted)}
+.confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+.fade{animation:fade .35s ease both}
+@keyframes fade{from{opacity:.4;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.fade{animation:none}button{transition:none}}
+</style>
+
+<div id="app" aria-live="polite"></div>
+
+<script>
+const EMOTIONS=[
+ ["기쁨","😊"],["신남","🤩"],["뿌듯함","😌"],["고마움","🥰"],
+ ["슬픔","😢"],["서운함","🥺"],["외로움","😶"],["실망","😞"],
+ ["화남","😠"],["억울함","😤"],["짜증","😒"],["부끄러움","😳"],
+ ["당황","😵"],["걱정","😟"],["두려움","😨"],["미안함","🙇"]
+];
+const REASONS=["표정이나 행동을 보고","그 사람의 역할(입장)을 생각해서","내가 비슷한 일을 겪어 봐서","그 전에 있었던 일을 떠올려서"];
+const INT_LABEL=["","조금","꽤","아주 많이"];
+
+const DEFAULT_SCENES=[
+ {id:"s1",title:"모둠 발표 중 친구가 웃음",situation:"민지가 모둠 대표로 발표를 하고 있어요. 그런데 발표 도중 준호가 갑자기 \"풉!\" 하고 웃었어요. 같은 모둠 서아는 그 모습을 보고 있었어요.",
+  cast:[{name:"민지",role:"발표한 친구",emoji:"🙋‍♀️",hidden:"실수할까 봐 어젯밤 늦게까지 발표 연습을 했어요."},
+        {name:"준호",role:"웃은 친구",emoji:"😆",hidden:"발표가 아니라 창밖에서 새 두 마리가 부딪히는 모습을 보고 웃음이 터졌어요."},
+        {name:"서아",role:"지켜본 친구",emoji:"👀",hidden:"민지 얼굴이 빨개지는 걸 보고, 쉬는 시간에 괜찮냐고 물어봐야겠다고 생각했어요."}]},
+ {id:"s2",title:"피구에서 맞았는데 아웃이 아니래요",situation:"피구 시간, 도윤이가 던진 공이 하린이 어깨에 맞았어요. 그런데 심판을 보던 지우가 \"땅에 먼저 튀겼으니까 아웃 아니야!\"라고 했어요.",
+  cast:[{name:"도윤",role:"공을 던진 친구",emoji:"🤾",hidden:"분명히 바로 맞았다고 생각해서, 우리 팀이 질까 봐 마음이 급했어요."},
+        {name:"하린",role:"공에 맞은 친구",emoji:"🙆‍♀️",hidden:"어깨가 조금 아팠지만, 아웃이 아니라서 다행이라고 생각했어요."},
+        {name:"지우",role:"심판을 본 친구",emoji:"🧑‍⚖️",hidden:"공정하게 보려고 애썼는데, 양쪽 팀이 다 째려보는 것 같아서 부담스러웠어요."}]},
+ {id:"s3",title:"단톡방에서 내 메시지만 답이 없어요",situation:"반 친구들 단톡방에 유나가 \"이번 주말에 같이 도서관 갈 사람?\"이라고 보냈어요. 메시지 옆의 숫자는 사라졌는데 아무도 답을 하지 않았어요.",
+  cast:[{name:"유나",role:"메시지를 보낸 친구",emoji:"📱",hidden:"용기를 내서 처음으로 먼저 제안해 본 거였어요."},
+        {name:"현우",role:"읽고 답하지 않은 친구",emoji:"🎮",hidden:"가고 싶었는데 주말 일정을 엄마께 먼저 여쭤보고 답하려고 했어요."},
+        {name:"소율",role:"단톡방의 다른 친구",emoji:"💬",hidden:"다른 친구가 먼저 답하면 따라서 답하려고 기다리고 있었어요."}]},
+ {id:"s4",title:"급식 줄에서 새치기를 했어요",situation:"점심시간 급식 줄에 서 있는데, 시우가 친구 앞으로 쏙 들어갔어요. 바로 뒤에 있던 예린이는 깜짝 놀랐고, 급식 당번 태오가 그 모습을 봤어요.",
+  cast:[{name:"시우",role:"줄에 끼어든 친구",emoji:"🏃",hidden:"아까 화장실에 가면서 친구에게 자리를 맡아 달라고 부탁했었어요."},
+        {name:"예린",role:"뒤에 서 있던 친구",emoji:"🙍‍♀️",hidden:"배가 많이 고팠고, 오늘따라 줄이 너무 길어서 지쳐 있었어요."},
+        {name:"태오",role:"급식 당번",emoji:"🧑‍🍳",hidden:"말려야 할지 모른 척해야 할지 몰라서 머뭇거렸어요."}]},
+ {id:"s5",title:"모둠 활동에서 한 친구가 가만히 있어요",situation:"모둠별로 포스터를 만드는 시간이에요. 은호는 펜을 든 채 아무것도 하지 않고, 다은이가 거의 혼자 그림을 그리고 있어요. 모둠장 지안이가 둘을 번갈아 봐요.",
+  cast:[{name:"은호",role:"가만히 있던 친구",emoji:"🤔",hidden:"그림을 못 그려서 망칠까 봐 겁이 났고, 무엇을 하면 좋을지 몰랐어요."},
+        {name:"다은",role:"혼자 다 한 친구",emoji:"🎨",hidden:"시간 안에 못 끝낼까 봐 조급해서 직접 다 하게 됐어요. 사실 좀 힘들었어요."},
+        {name:"지안",role:"모둠장",emoji:"🧭",hidden:"둘 다 속상하지 않게 역할을 나눠 주고 싶은데, 어떻게 말할지 고민됐어요."}]}
+];
+
+const store={
+  get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}
+};
+let settings=Object.assign({hidden:true,save:false,reasons:true},store.get("ssdm_settings",{}));
+let customScenes=store.get("ssdm_custom",[]);
+const allScenes=()=>DEFAULT_SCENES.concat(customScenes);
+
+let S={screen:"home"};
+const app=document.getElementById("app");
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const cv=i=>`var(--c${i})`, cs=i=>`var(--c${i}-soft)`;
+
+function go(screen,extra){S=Object.assign(S,{screen},extra||{});render();window.scrollTo({top:0,behavior:"instant"in window?"instant":"auto"})}
+
+function topbar(back){
+  return `<div class="topbar">
+    <div class="brand"><span class="dots"><i></i><i></i><i></i></span>같은 장면, 다른 마음</div>
+    <div class="row">${back?`<button class="icon-btn" data-act="${back}">← 뒤로</button>`:""}
+    ${S.screen==="home"?`${settings.save?`<button class="icon-btn" data-act="records">내 기록</button>`:""}<button class="icon-btn" data-act="settings" aria-label="교사 설정">⚙ 교사 설정</button>`:""}</div>
+  </div>`;
+}
+
+function castHTML(sc){
+  return `<div class="cast">${sc.cast.map((c,i)=>`<div class="actor" style="background:${cs(i)}"><span class="e">${esc(c.emoji)}</span><span class="n">${esc(c.name)}</span><span class="r">${esc(c.role)}</span></div>`).join("")}</div>`;
+}
+
+const screens={
+home(){
+  return `${topbar()}
+  <section class="hero fade">
+    <div class="lenses" aria-hidden="true"><span></span><span></span><span></span></div>
+    <h1>같은 장면, 다른 마음</h1>
+    <p class="muted" style="max-width:34em">하나의 장면을 세 사람의 눈으로 다시 봐요. 같은 일이라도 사람마다 느끼는 마음은 다를 수 있어요.</p>
+    <ol class="steps">
+      <li>장면을 골라 읽어요</li>
+      <li>처음 든 생각을 적어요</li>
+      <li>세 사람이 차례로 되어 봐요</li>
+      <li>세 마음을 나란히 비교해요</li>
+    </ol>
+    <div><button class="btn" data-act="pick">장면 고르러 가기</button></div>
+  </section>`;
+},
+pick(){
+  return `${topbar("home")}
+  <h2>어떤 장면을 볼까요?</h2>
+  <div class="scenes fade">${allScenes().map(sc=>`
+    <button class="scene-card" data-scene="${esc(sc.id)}">
+      <span class="who" aria-hidden="true">${sc.cast.map(c=>esc(c.emoji)).join("")}</span>
+      <span class="t">${esc(sc.title)}</span>
+      <span class="tag">${sc.cast.map(c=>esc(c.name)).join(" · ")}${sc.custom?" · 선생님이 만든 장면":""}</span>
+    </button>`).join("")}
+  </div>`;
+},
+scene(){
+  const sc=S.sc;
+  return `${topbar("pick")}
+  <div class="stage fade">
+    <span class="label">장면</span>
+    <h2>${esc(sc.title)}</h2>
+    ${castHTML(sc)}
+    <p class="situation">${esc(sc.situation)}</p>
+  </div>
+  <div class="panel">
+    <label class="q" for="first">이 장면을 보고 처음 든 생각은?</label>
+    <p class="muted" style="font-size:16px">정답은 없어요. 떠오르는 대로 한 줄로 적어 보세요.</p>
+    <textarea id="first" placeholder="예) 준호가 민지를 놀린 것 같아요.">${esc(S.r.first)}</textarea>
+    <div class="row end"><button class="btn" data-act="startLens" ${S.r.first.trim()?"":"disabled"}>${esc(sc.cast[0].name)}의 마음이 되어 보기</button></div>
+  </div>`;
+},
+lens(){
+  const sc=S.sc,i=S.idx,c=sc.cast[i],a=S.r.ans[i];
+  const ok=a.emotions.length>0&&a.thought.trim();
+  return `${topbar(i===0?"scene":"prevLens")}
+  <div class="progress" aria-label="${i+1}번째 인물 / 3">${[0,1,2].map(k=>`<i class="${k<=i?"on":""}"></i>`).join("")}</div>
+  <div class="lens-head fade" style="background:${cs(i)}">
+    <span class="e" style="box-shadow:0 0 0 5px ${cv(i)}">${esc(c.emoji)}</span>
+    <div><span class="say">이제 나는 ${esc(c.role)},</span><h2>${esc(c.name)}이에요</h2></div>
+  </div>
+  <details class="panel" style="gap:8px"><summary class="muted" style="cursor:pointer">장면 다시 읽기</summary><p>${esc(sc.situation)}</p></details>
+  <div class="panel">
+    <span class="q" style="font-family:var(--display);font-size:20px">${esc(c.name)}은(는) 지금 어떤 감정일까요?</span>
+    <p class="muted" style="font-size:16px">감정 카드를 2개까지 고를 수 있어요.</p>
+    <div class="emotions">${EMOTIONS.map(([n,f])=>`<button class="emo" data-emo="${n}" aria-pressed="${a.emotions.some(e=>e.n===n)}"><span class="f" aria-hidden="true">${f}</span>${n}</button>`).join("")}</div>
+    ${a.emotions.length?`<div class="intensity"><span class="label">얼마나 느낄까요?</span>${a.emotions.map(e=>`
+      <div class="int-row"><strong>${e.n}</strong><span class="seg">${[1,2,3].map(v=>`<button data-int="${e.n}" data-v="${v}" aria-pressed="${e.v===v}">${INT_LABEL[v]}</button>`).join("")}</span></div>`).join("")}</div>`:""}
+  </div>
+  <div class="panel" style="background:${cs(i)};border-color:transparent">
+    <label class="bubble-prefix" for="thought">💭 ${esc(c.name)}의 속마음: "나는 지금…"</label>
+    <textarea id="thought" placeholder="${esc(c.name)}이 되어 마음속 말을 적어 보세요.">${esc(a.thought)}</textarea>
+  </div>
+  <div class="panel">
+    <span class="q" style="font-family:var(--display);font-size:20px">왜 그렇게 생각했나요?</span>
+    ${settings.reasons?`<div class="chips">${REASONS.map(r=>`<button class="chip" data-reason="${esc(r)}" aria-pressed="${a.reasons.includes(r)}">${r}</button>`).join("")}</div>`:""}
+    <input type="text" id="reasonText" placeholder="${settings.reasons?"직접 써도 좋아요 (선택)":"이유를 적어 보세요"}" value="${esc(a.reasonText)}">
+  </div>
+  <div class="row between">
+    <span class="muted" style="font-size:15px">${ok?"좋아요! 다음으로 넘어갈 수 있어요.":"감정 카드와 속마음을 채우면 넘어갈 수 있어요."}</span>
+    <button class="btn" data-act="nextLens" ${ok?"":"disabled"}>${i<2?`${esc(sc.cast[i+1].name)}의 마음 보기 →`:"세 마음 비교하기 →"}</button>
+  </div>`;
+},
+compare(){
+  const sc=S.sc;
+  return `${topbar("lastLens")}
+  <h2>같은 장면, 세 가지 마음</h2>
+  <p class="muted">${esc(sc.title)}</p>
+  <div class="compare fade">${sc.cast.map((c,i)=>{const a=S.r.ans[i];return `
+    <article class="cmp" style="background:${cs(i)}">
+      <div class="hd"><span class="e">${esc(c.emoji)}</span><div><h3>${esc(c.name)}</h3><span class="tag">${esc(c.role)}</span></div></div>
+      <div class="feel">${a.emotions.map(e=>`<span class="pill">${EMOTIONS.find(x=>x[0]===e.n)[1]} ${e.n} · ${INT_LABEL[e.v]}</span>`).join("")}</div>
+      <p class="speech">💭 ${esc(a.thought)}</p>
+      ${settings.hidden&&c.hidden?(S.revealed[i]?`<p class="hidden-story" style="color:var(--ink);border-color:${cv(i)}"><span class="label">실제로는 이랬대요</span><br>${esc(c.hidden)}</p>`:`<button class="reveal" data-reveal="${i}">숨은 이야기 펼쳐 보기</button>`):""}
+    </article>`}).join("")}
+  </div>
+  <div class="panel">
+    <span class="label">처음 내 생각</span>
+    <p>${esc(S.r.first)}</p>
+  </div>
+  <div class="row end"><button class="btn" data-act="reflect">마무리 생각하기 →</button></div>`;
+},
+reflect(){
+  return `${topbar("compare")}
+  <h2>마무리 생각</h2>
+  <div class="panel fade">
+    <label class="q" for="changed">처음 내 생각과 달라진 점은 무엇인가요?</label>
+    <p class="notice">처음 내 생각: ${esc(S.r.first)}</p>
+    <textarea id="changed" placeholder="예) 준호가 놀린 줄 알았는데, 다른 이유가 있을 수도 있다는 걸 알았어요.">${esc(S.r.changed)}</textarea>
+  </div>
+  <div class="panel">
+    <label class="q" for="act">내가 그 자리에 있었다면 어떻게 행동할까요?</label>
+    <textarea id="act" placeholder="예) 민지에게 다가가 괜찮냐고 물어볼 거예요.">${esc(S.r.act)}</textarea>
+  </div>
+  <div class="row end"><button class="btn" data-act="finish" ${S.r.changed.trim()?"":"disabled"}>활동 마치기</button></div>`;
+},
+done(){
+  const sc=S.sc;
+  return `${topbar()}
+  <section class="stage fade" style="align-items:flex-start">
+    <div class="lenses" aria-hidden="true" style="height:120px"><span style="width:100px;height:100px"></span><span style="width:100px;height:100px;left:70px"></span><span style="width:100px;height:100px;left:140px"></span></div>
+    <h2>세 사람의 마음을 모두 살펴봤어요!</h2>
+    <p class="muted">${esc(sc.title)}</p>
+    <div class="grid2" style="width:100%">
+      <div><span class="label">달라진 생각</span><p>${esc(S.r.changed)}</p></div>
+      ${S.r.act.trim()?`<div><span class="label">내가 한다면</span><p>${esc(S.r.act)}</p></div>`:""}
+    </div>
+    ${settings.save?`<p class="notice">${S.savedOk?"이 기기에 기록을 저장했어요. 처음 화면의 '내 기록'에서 다시 볼 수 있어요.":"이 기기에 저장하지 못했어요. 브라우저 설정에서 사이트 데이터 저장을 허용해 주세요."}</p>`:`<p class="notice">활동 내용은 저장되지 않아요. 새 장면을 고르면 처음부터 시작해요.</p>`}
+  </section>
+  <div class="row end">
+    <button class="ghost" data-act="home">처음으로</button>
+    <button class="btn" data-act="pick">다른 장면 해 보기</button>
+  </div>`;
+},
+records(){
+  const recs=store.get("ssdm_records",[]);
+  return `${topbar("home")}
+  <div class="row between"><h2>내 기록</h2>
+  ${recs.length?(S.confirmClear?`<span class="confirm"><span class="muted" style="font-size:15px">정말 모두 지울까요?</span><button class="icon-btn" data-act="clearYes">지우기</button><button class="icon-btn" data-act="clearNo">취소</button></span>`:`<button class="icon-btn" data-act="clearAsk">기록 모두 지우기</button>`):""}</div>
+  ${recs.length?recs.slice().reverse().map(r=>`
+    <details class="rec"><summary>${esc(r.title)} <span class="tag">· ${esc(r.date)}</span></summary>
+      <div class="rec-body">
+        <p><span class="label">처음 생각</span><br>${esc(r.first)}</p>
+        ${r.cast.map(c=>`<p><strong>${esc(c.emoji)} ${esc(c.name)}</strong> — ${c.emotions.map(e=>`${e.n}(${INT_LABEL[e.v]})`).join(", ")}<br>💭 ${esc(c.thought)}</p>`).join("")}
+        <p><span class="label">달라진 생각</span><br>${esc(r.changed)}</p>
+        ${r.act?`<p><span class="label">내가 한다면</span><br>${esc(r.act)}</p>`:""}
+      </div></details>`).join(""):`<div class="panel"><p>아직 저장된 기록이 없어요.</p><p class="muted" style="font-size:16px">활동을 끝까지 마치면 이 기기에 기록이 쌓여요.</p></div>`}`;
+},
+settings(){
+  const d=S.draft;
+  return `${topbar("home")}
+  <h2>교사 설정</h2>
+  <div class="panel">
+    <label class="switch"><span><strong>숨은 이야기 공개</strong><br><span class="muted" style="font-size:15px">비교 화면에서 인물의 실제 사정을 펼쳐 볼 수 있어요.</span></span><input type="checkbox" id="setHidden" ${settings.hidden?"checked":""}></label>
+    <label class="switch"><span><strong>이유 고르기 보기</strong><br><span class="muted" style="font-size:15px">글쓰기가 어려운 학생도 이유를 고를 수 있어요.</span></span><input type="checkbox" id="setReasons" ${settings.reasons?"checked":""}></label>
+    <label class="switch"><span><strong>이 기기에 기록 저장</strong><br><span class="muted" style="font-size:15px">이름 없이 날짜와 장면만 저장돼요. 끄면 아무것도 남지 않아요.</span></span><input type="checkbox" id="setSave" ${settings.save?"checked":""}></label>
+  </div>
+  <h3>새 장면 만들기</h3>
+  <div class="panel">
+    <input type="text" id="nTitle" placeholder="장면 제목 (예: 체육복을 빌려주지 않았어요)" value="${esc(d.title)}">
+    <textarea id="nSit" placeholder="상황 설명">${esc(d.situation)}</textarea>
+    ${[0,1,2].map(i=>`<div class="panel" style="background:${cs(i)};border-color:transparent;padding:14px;gap:8px">
+      <span class="label">인물 ${i+1}</span>
+      <div class="grid2">
+        <input type="text" id="n${i}name" placeholder="이름" value="${esc(d.cast[i].name)}">
+        <input type="text" id="n${i}role" placeholder="역할 (예: 빌려 달라고 한 친구)" value="${esc(d.cast[i].role)}">
+      </div>
+      <input type="text" id="n${i}emoji" placeholder="이모지 (예: 🙂)" value="${esc(d.cast[i].emoji)}">
+      <input type="text" id="n${i}hidden" placeholder="숨은 이야기 (선택)" value="${esc(d.cast[i].hidden)}">
+    </div>`).join("")}
+    <div class="row end"><button class="btn" data-act="addScene">장면 추가</button></div>
+    ${S.msg?`<p class="notice">${esc(S.msg)}</p>`:""}
+  </div>
+  ${customScenes.length?`<h3>선생님이 만든 장면</h3><div class="panel">${customScenes.map(sc=>`<div class="row between"><span>${esc(sc.title)}</span><button class="icon-btn" data-del="${esc(sc.id)}">삭제</button></div>`).join("")}</div>`:""}
+  <p class="notice">새 장면과 설정은 지금 쓰는 이 브라우저에만 저장돼요. 학생 기기마다 따로 적용돼요.</p>`;
+}
+};
+
+function emptyDraft(){return {title:"",situation:"",cast:[0,1,2].map(()=>({name:"",role:"",emoji:"",hidden:""}))}}
+function render(){app.innerHTML=screens[S.screen]();}
+
+function startScene(id){
+  const sc=allScenes().find(s=>s.id===id);
+  S.sc=sc;S.idx=0;S.revealed=[false,false,false];
+  S.r={first:"",changed:"",act:"",ans:[0,1,2].map(()=>({emotions:[],thought:"",reasons:[],reasonText:""}))};
+  go("scene");
+}
+
+app.addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.scene){startScene(b.dataset.scene);return}
+  if(b.dataset.emo){
+    const a=S.r.ans[S.idx],n=b.dataset.emo,k=a.emotions.findIndex(x=>x.n===n);
+    if(k>=0)a.emotions.splice(k,1);else{if(a.emotions.length>=2)a.emotions.shift();a.emotions.push({n,v:2})}
+    keepScroll(render);return;
+  }
+  if(b.dataset.int){const e2=S.r.ans[S.idx].emotions.find(x=>x.n===b.dataset.int);e2.v=+b.dataset.v;keepScroll(render);return}
+  if(b.dataset.reason){const a=S.r.ans[S.idx],r=b.dataset.reason,k=a.reasons.indexOf(r);k>=0?a.reasons.splice(k,1):a.reasons.push(r);keepScroll(render);return}
+  if(b.dataset.reveal){S.revealed[+b.dataset.reveal]=true;keepScroll(render);return}
+  if(b.dataset.del){customScenes=customScenes.filter(s=>s.id!==b.dataset.del);store.set("ssdm_custom",customScenes);keepScroll(render);return}
+  const act=b.dataset.act;
+  switch(act){
+    case"home":go("home");break;
+    case"pick":go("pick");break;
+    case"scene":go("scene");break;
+    case"records":S.confirmClear=false;go("records");break;
+    case"settings":S.draft=emptyDraft();S.msg="";go("settings");break;
+    case"startLens":S.idx=0;go("lens");break;
+    case"prevLens":S.idx--;go("lens");break;
+    case"lastLens":S.idx=2;go("lens");break;
+    case"nextLens":if(S.idx<2){S.idx++;go("lens")}else go("compare");break;
+    case"compare":go("compare");break;
+    case"reflect":go("reflect");break;
+    case"finish":
+      S.savedOk=false;
+      if(settings.save){
+        const recs=store.get("ssdm_records",[]);
+        const d=new Date();
+        recs.push({title:S.sc.title,date:`${d.getMonth()+1}월 ${d.getDate()}일 ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`,
+          first:S.r.first,changed:S.r.changed,act:S.r.act,
+          cast:S.sc.cast.map((c,i)=>({name:c.name,emoji:c.emoji,emotions:S.r.ans[i].emotions,thought:S.r.ans[i].thought}))});
+        S.savedOk=store.set("ssdm_records",recs.slice(-50));
+      }
+      go("done");break;
+    case"clearAsk":S.confirmClear=true;render();break;
+    case"clearNo":S.confirmClear=false;render();break;
+    case"clearYes":store.set("ssdm_records",[]);S.confirmClear=false;render();break;
+    case"addScene":{
+      const d=S.draft;
+      if(!d.title.trim()||!d.situation.trim()||d.cast.some(c=>!c.name.trim())){S.msg="제목, 상황 설명, 인물 3명의 이름은 꼭 적어 주세요.";keepScroll(render);break}
+      customScenes.push({id:"c"+Date.now(),custom:true,title:d.title.trim(),situation:d.situation.trim(),
+        cast:d.cast.map((c,i)=>({name:c.name.trim(),role:c.role.trim()||"등장인물",emoji:c.emoji.trim()||["🙂","😐","🙃"][i],hidden:c.hidden.trim()}))});
+      const ok=store.set("ssdm_custom",customScenes);
+      S.draft=emptyDraft();S.msg=ok?"장면을 추가했어요. 장면 고르기 화면에서 볼 수 있어요.":"장면을 추가했지만 이 브라우저에 저장하지 못해서 새로고침하면 사라져요.";
+      keepScroll(render);break;
+    }
+  }
+});
+
+app.addEventListener("input",e=>{
+  const t=e.target,id=t.id,v=t.value;
+  if(S.screen==="scene"&&id==="first"){S.r.first=v;const btn=app.querySelector('[data-act="startLens"]');btn.disabled=!v.trim();return}
+  if(S.screen==="lens"){
+    const a=S.r.ans[S.idx];
+    if(id==="thought")a.thought=v;
+    if(id==="reasonText")a.reasonText=v;
+    const ok=a.emotions.length>0&&a.thought.trim();
+    const btn=app.querySelector('[data-act="nextLens"]');btn.disabled=!ok;
+    btn.parentElement.querySelector("span").textContent=ok?"좋아요! 다음으로 넘어갈 수 있어요.":"감정 카드와 속마음을 채우면 넘어갈 수 있어요.";
+    return;
+  }
+  if(S.screen==="reflect"){
+    if(id==="changed"){S.r.changed=v;app.querySelector('[data-act="finish"]').disabled=!v.trim()}
+    if(id==="act")S.r.act=v;
+    return;
+  }
+  if(S.screen==="settings"){
+    const d=S.draft,m=id.match(/^n(\d)(name|role|emoji|hidden)$/);
+    if(id==="nTitle")d.title=v;else if(id==="nSit")d.situation=v;else if(m)d.cast[+m[1]][m[2]]=v;
+  }
+});
+
+app.addEventListener("change",e=>{
+  const t=e.target;
+  const map={setHidden:"hidden",setReasons:"reasons",setSave:"save"};
+  if(map[t.id]){settings[map[t.id]]=t.checked;store.set("ssdm_settings",settings)}
+});
+
+function keepScroll(fn){const y=window.scrollY;const id=document.activeElement&&document.activeElement.id;fn();window.scrollTo(0,y);if(id){const el=document.getElementById(id);el&&el.focus()}}
+
+render();
+</script>
+
+</body></html>

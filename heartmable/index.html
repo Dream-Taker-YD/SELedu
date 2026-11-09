@@ -1,0 +1,851 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>마음 마블</title>
+<style>
+  :root { --ink:#2b2b2b; --wood:#6b4423; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; color: var(--ink);
+    font-family: 'Pretendard','Noto Sans KR','Malgun Gothic','Apple SD Gothic Neo',sans-serif;
+    background: linear-gradient(160deg,#fff4dc 0%,#ffe3ec 100%);
+  }
+  button { font-family: inherit; cursor: pointer; }
+  .btn {
+    border: none; border-radius: 12px; padding: 12px 18px; font-size: 16px; font-weight: 700;
+    background: #f1f3f5; color: #333; box-shadow: 0 3px 0 rgba(0,0,0,.15); transition: transform .08s;
+  }
+  .btn:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,.15); }
+  .btn.primary { background: #ff922b; color: #fff; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+
+  /* ---------- 설정 화면 ---------- */
+  .setup { max-width: 760px; margin: 0 auto; padding: 28px 16px 40px; }
+  .setup h1 { text-align: center; font-size: 44px; margin: 6px 0 4px; }
+  .setup .sub { text-align: center; margin: 0 0 22px; color: #666; font-size: 17px; }
+  .card { background: #fff; border-radius: 20px; padding: 22px; box-shadow: 0 6px 24px rgba(0,0,0,.08); margin-bottom: 18px; }
+  .card h3 { margin: 0 0 12px; }
+  .countBtns { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .countBtns button { border: 2px solid #ffd8a8; background: #fff; border-radius: 10px; padding: 8px 16px; font-size: 16px; font-weight: 700; }
+  .countBtns button.on { background: #ff922b; color: #fff; border-color: #ff922b; }
+  .nameRow { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .nameRow .em { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #fff; }
+  .nameRow input { flex: 1; }
+  input[type=text], input[type=number] { font-family: inherit; font-size: 16px; padding: 9px 12px; border: 2px solid #eee; border-radius: 10px; }
+  .settings { display: flex; gap: 16px; flex-wrap: wrap; margin: 16px 0; }
+  .settings label { display: flex; flex-direction: column; gap: 4px; font-weight: 700; font-size: 14px; }
+  .settings input { width: 140px; }
+  .startBtn { width: 100%; font-size: 20px; padding: 16px; }
+  .rules ol { margin: 0; padding-left: 22px; line-height: 1.8; }
+  .groupList { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .chip { border-radius: 999px; padding: 4px 10px; color: #fff; font-size: 13px; font-weight: 700; }
+
+  /* ---------- 게임 화면 ---------- */
+  #game { display: flex; gap: 14px; padding: 12px; justify-content: center; align-items: flex-start; }
+  #board {
+    --s: min(calc(100vh - 24px), calc(100vw - 370px));
+    width: var(--s); height: var(--s); flex-shrink: 0;
+    display: grid; grid-template-columns: repeat(7,1fr); grid-template-rows: repeat(7,1fr);
+    gap: 3px; padding: 6px; border-radius: 18px;
+    background: var(--wood); box-shadow: 0 10px 30px rgba(0,0,0,.25);
+  }
+  .tile {
+    position: relative; overflow: hidden; border-radius: 7px; background: #fffdf6;
+    display: flex; flex-direction: column; font-size: calc(var(--s) / 64); cursor: pointer;
+  }
+  .tile .band { height: 12%; flex-shrink: 0; }
+  .tile .tname { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-weight: 800; line-height: 1.15; padding: 0 2px; word-break: keep-all; }
+  .tile .ticon { font-size: 1.45em; line-height: 1.1; }
+  .tile .tinfo { text-align: center; font-size: .92em; font-weight: 700; color: #555; white-space: nowrap; overflow: hidden; }
+  .tile .tokens { height: 24%; flex-shrink: 0; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 1px; }
+  .token {
+    width: calc(var(--s) / 34); height: calc(var(--s) / 34); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: calc(var(--s) / 52);
+    border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.4);
+  }
+  .tile.corner { background: #fff3bf; }
+  .tile.chance { background: #e7f5ff; }
+  .tile.owned { box-shadow: inset 0 0 0 3px var(--oc); background: color-mix(in srgb, var(--oc) 15%, white); }
+  .tile.owned .tinfo { color: var(--oc); }
+  .tile.active { outline: 4px solid #fcc419; outline-offset: -2px; z-index: 2; }
+
+  .center {
+    grid-row: 2 / 7; grid-column: 2 / 7; position: relative; border-radius: 12px;
+    background: radial-gradient(circle,#fffaf0 0%,#ffe8c2 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: calc(var(--s) / 70); font-size: calc(var(--s) / 46); text-align: center; padding: 10px;
+  }
+  .center .logo { font-size: 2.1em; font-weight: 900; color: #e8590c; }
+  .center .legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; max-width: 92%; }
+  .center .legend .chip { font-size: .62em; padding: 3px 8px; }
+  .turn { font-size: 1.15em; font-weight: 800; padding: 6px 16px; border-radius: 999px; color: #fff; }
+  .dice { display: flex; gap: calc(var(--s) / 40); }
+  .die {
+    width: calc(var(--s) / 8.5); height: calc(var(--s) / 8.5); background: #fff; border-radius: 18%;
+    display: grid; grid-template: repeat(3,1fr) / repeat(3,1fr); padding: 9%;
+    box-shadow: 0 4px 0 #d9c4a3, 0 6px 14px rgba(0,0,0,.2);
+  }
+  .die span.pip { background: #222; border-radius: 50%; margin: 14%; }
+  .die.rolling { animation: shake .14s infinite; }
+  @keyframes shake { 0%{transform:rotate(-10deg) translateY(-3px)} 50%{transform:rotate(10deg) translateY(3px)} 100%{transform:rotate(-10deg)} }
+  .rollmsg { font-weight: 700; min-height: 1.3em; }
+  .roll { font-size: 1.1em; padding: .6em 1.4em; }
+  .cbar { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: center; font-size: .78em; font-weight: 700; }
+  .mini { border: none; background: rgba(255,255,255,.8); border-radius: 8px; padding: 4px 9px; font-size: 1em; font-weight: 700; }
+  .toast {
+    position: absolute; top: 8%; left: 50%; transform: translateX(-50%) scale(.8); opacity: 0;
+    background: #212529; color: #fff; padding: 8px 16px; border-radius: 999px; font-weight: 700; font-size: .9em;
+    transition: all .25s; pointer-events: none; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) scale(1); }
+
+  #side { width: 340px; display: flex; flex-direction: column; gap: 10px; }
+  .pcard {
+    display: flex; gap: 10px; align-items: center; background: #fff; border-radius: 14px; padding: 10px 12px;
+    border-left: 8px solid var(--pc); box-shadow: 0 3px 10px rgba(0,0,0,.07); transition: transform .2s;
+  }
+  .pcard.cur { transform: scale(1.03); box-shadow: 0 0 0 3px var(--pc), 0 6px 16px rgba(0,0,0,.12); }
+  .pcard.bk { opacity: .45; filter: grayscale(1); }
+  .pcard .pe { width: 42px; height: 42px; border-radius: 50%; background: var(--pc); display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+  .pcard .pn { font-weight: 800; font-size: 16px; }
+  .pcard .pm { font-weight: 800; font-size: 19px; color: #e67700; }
+  .pcard .pa { font-size: 12px; color: #777; }
+  .logBox { background: rgba(255,255,255,.85); border-radius: 14px; padding: 10px 12px; max-height: 34vh; overflow-y: auto; font-size: 13px; line-height: 1.6; }
+  .logBox h4 { margin: 0 0 6px; }
+  .logBox div { border-bottom: 1px dashed #eee; }
+
+  /* ---------- 모달 ---------- */
+  #modalBg { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 16px; }
+  #modalBg[hidden] { display: none; }
+  #modal { background: #fff; border-radius: 22px; padding: 26px 24px 22px; width: min(540px,100%); text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,.3); animation: pop .22s ease-out; max-height: 92vh; overflow-y: auto; }
+  @keyframes pop { from { transform: scale(.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  #mTitle { margin: 0 0 14px; font-size: 26px; }
+  .badge { display: inline-block; color: #fff; font-weight: 800; padding: 5px 14px; border-radius: 999px; margin-bottom: 12px; }
+  .mission { font-size: 22px; font-weight: 700; line-height: 1.55; margin: 6px 0 14px; word-break: keep-all; }
+  .hint { font-size: 15px; color: #666; line-height: 1.6; background: #f8f9fa; border-radius: 12px; padding: 10px 12px; word-break: keep-all; }
+  .bigcoin { font-size: 34px; font-weight: 900; color: #e67700; margin: 4px 0 12px; }
+  .cicon { font-size: 56px; }
+  .lvl { font-size: 26px; margin-bottom: 6px; }
+  #mBtns { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 18px; }
+  .rank { display: flex; justify-content: space-between; gap: 10px; font-size: 19px; font-weight: 700; padding: 8px 12px; border-radius: 10px; background: #fff9db; margin-bottom: 6px; }
+  .info td { padding: 4px 10px; } .info { margin: 0 auto; font-size: 16px; }
+
+  @media (max-width: 860px) {
+    #game { flex-direction: column; align-items: center; }
+    #board { --s: calc(100vw - 16px); }
+    #side { width: calc(100vw - 16px); }
+  }
+</style>
+</head>
+<body>
+
+<!-- 설정 화면 -->
+<div id="setup" class="setup">
+  <h1>🎲 마음 마블</h1>
+  <p class="sub">마음 미션을 해결하고 장소를 점유하는 사회정서 보드게임</p>
+
+  <div class="card">
+    <h3>참가 인원 (모둠 수)</h3>
+    <div class="countBtns" id="countBtns"></div>
+    <div id="nameInputs"></div>
+    <div class="settings">
+      <label>시작 코인 <input type="number" id="startMoney" value="2000" step="100" min="500"></label>
+      <label>월급 (한 바퀴마다) <input type="number" id="salary" value="300" step="50" min="0"></label>
+    </div>
+    <button class="btn primary startBtn" id="startBtn">게임 시작!</button>
+  </div>
+
+  <div class="card rules">
+    <h3>📖 게임 방법</h3>
+    <ol>
+      <li><b>주사위 굴리기</b> 버튼을 눌러 나온 수만큼 이동해요. 두 주사위 숫자가 같으면(더블) 한 번 더!</li>
+      <li>빈 장소에 도착하면 <b>마음 미션</b>에 도전해요. 성공하면 코인을 내고 그 장소를 점유할 수 있어요.</li>
+      <li>친구가 점유한 장소에 도착하면 <b>사용료</b>를 내요.</li>
+      <li>내 장소에 다시 오면 비용을 내고 <b>레벨업</b>(최대 3단계)! 단계가 오를수록 사용료가 비싸져요.</li>
+      <li>출발 칸을 지나면 <b>월급</b>을 받아요. 나눔 광장의 기부금은 마음 쉼터에 도착한 친구가 받아요.</li>
+      <li>코인이 모자라 낼 돈을 못 내면 <b>파산</b>! 마지막까지 남은 사람이 승리해요.</li>
+    </ol>
+    <div class="groupList" id="groupList"></div>
+  </div>
+</div>
+
+<!-- 게임 화면 -->
+<div id="game" hidden>
+  <div id="board"></div>
+  <aside id="side">
+    <div id="players"></div>
+    <div class="logBox"><h4>📜 게임 기록</h4><div id="log"></div></div>
+  </aside>
+</div>
+
+<!-- 모달 -->
+<div id="modalBg" hidden>
+  <div id="modal">
+    <h2 id="mTitle"></h2>
+    <div id="mBody"></div>
+    <div id="mBtns"></div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   데이터
+   ========================================================= */
+const GROUPS = {
+  SA: { name: '자기인식',           color: '#ff6b6b' },
+  SM: { name: '자기관리',           color: '#f59f00' },
+  SO: { name: '사회적 인식',        color: '#40c057' },
+  RS: { name: '관계 기술',          color: '#339af0' },
+  RD: { name: '책임 있는 의사결정', color: '#845ef7' }
+};
+
+const MISSIONS = {
+  SA: [
+    '오늘 내 기분을 날씨로 표현하고, 그 이유를 말해요.',
+    '내가 잘하는 점(강점) 2가지를 자신 있게 말해요.',
+    '최근에 화가 났던 순간을 떠올리고, 그때 몸에서 어떤 느낌이 들었는지 말해요.',
+    '10초 안에 감정 단어 5개를 말해요.',
+    '나를 동물에 비유하고, 그 이유를 말해요.',
+    '요즘 나를 가장 행복하게 하는 것 한 가지를 소개해요.',
+    '친구가 표정으로 감정을 보여 주면, 어떤 감정인지 맞혀요.',
+    '내가 고치고 싶은 습관 한 가지와 그 이유를 말해요.'
+  ],
+  SM: [
+    '4초 들이쉬고, 4초 멈추고, 4초 내쉬는 호흡을 3번 해요.',
+    '화가 날 때 마음을 가라앉히는 나만의 방법 2가지를 말해요.',
+    '이번 주 나의 작은 목표 하나를 정해 발표해요.',
+    '10초 동안 눈을 감고 아무 말 없이 가만히 있어요.',
+    '하기 싫은 일을 먼저 끝내는 나만의 비법을 말해요.',
+    '실수했을 때 나에게 해 줄 응원의 말을 해요.',
+    '긴장될 때 외우는 나만의 "마음 주문"을 만들어 외쳐요.',
+    '숙제 시간과 노는 시간을 어떻게 나누면 좋을지 계획을 말해요.'
+  ],
+  SO: [
+    '오른쪽 친구의 오늘 기분을 추측해 말하고, 맞는지 확인해요.',
+    '친구가 속상해 보일 때 할 수 있는 행동 2가지를 말해요.',
+    '나와 다른 점이 있는 친구의 좋은 점을 말해요.',
+    '혼자 있는 친구를 보면 어떻게 할지 말해요.',
+    '우리 학교를 위해 수고하시는 분께 감사 인사를 해요.',
+    '다른 플레이어 한 명의 좋은 점을 찾아 칭찬해요.',
+    '"다른 사람의 입장이 되어 본다"는 게 무슨 뜻인지 예를 들어 말해요.',
+    '상황극: 넘어진 친구에게 건넬 따뜻한 말을 해요.'
+  ],
+  RS: [
+    '"나 전달법"으로 친구에게 부탁하는 말을 해요. (예: 네가 ~해서 나는 ~했어. ~해 줄래?)',
+    '옆 친구와 하이파이브를 하고, 서로 칭찬 한마디씩 해요.',
+    '친구와 다퉜을 때 먼저 화해하는 말을 해 보아요.',
+    '친구가 한 말을 듣고 그대로 따라 말해 주는 "경청 놀이"를 해요.',
+    '친구의 부탁을 기분 나쁘지 않게 거절하는 말을 해요.',
+    '다른 플레이어 한 명과 10초 안에 공통점 3가지를 찾아요.',
+    '모둠 활동에서 의견이 다를 때 좋은 해결 방법을 말해요.',
+    '친구에게 고마웠던 일을 떠올려 "고마워"라고 말해요.'
+  ],
+  RD: [
+    '친구가 숙제를 베끼게 해 달라고 하면 어떻게 할지 말해요.',
+    '거짓말을 하고 싶은 순간, 어떤 선택이 좋을지 이유와 함께 말해요.',
+    '우리 반 규칙 중 가장 중요하다고 생각하는 것과 그 이유를 말해요.',
+    '친구가 다른 친구를 놀릴 때 내가 할 수 있는 행동을 말해요.',
+    '중요한 결정을 하기 전에 생각해야 할 것 2가지를 말해요.',
+    '내가 했던 선택 중 잘한 선택 하나를 소개해요.',
+    '게임에서 졌을 때 어떻게 행동하는 것이 좋을지 말해요.',
+    '아무도 안 볼 때 쓰레기가 떨어져 있다면 어떻게 할지 말해요.'
+  ]
+};
+
+const T = (type, o = {}) => ({ type, ...o });
+const TILES = [
+  T('start',  { name: '출발', icon: '🚩' }),
+  T('prop',   { name: '감정 거울 호수', icon: '🪞', g: 'SA', price: 200 }),
+  T('prop',   { name: '마음 날씨 관측소', icon: '🌦️', g: 'SA', price: 220 }),
+  T('chance', { name: '마음 찬스', icon: '🎁' }),
+  T('prop',   { name: '강점 보물섬', icon: '💎', g: 'SA', price: 240 }),
+  T('prop',   { name: '숨쉬기 숲', icon: '🌲', g: 'SM', price: 260 }),
+  T('rest',   { name: '마음 쉼터', icon: '🌿' }),
+  T('prop',   { name: '목표 등대', icon: '🗼', g: 'SM', price: 280 }),
+  T('chance', { name: '마음 찬스', icon: '🎁' }),
+  T('prop',   { name: '끈기 산', icon: '⛰️', g: 'SM', price: 300 }),
+  T('prop',   { name: '공감 다리', icon: '🌉', g: 'SO', price: 320 }),
+  T('prop',   { name: '배려 마을', icon: '🏘️', g: 'SO', price: 340 }),
+  T('praise', { name: '칭찬 릴레이', icon: '👏' }),
+  T('prop',   { name: '다양성 광장', icon: '🌈', g: 'SO', price: 360 }),
+  T('chance', { name: '마음 찬스', icon: '🎁' }),
+  T('prop',   { name: '우정 카페', icon: '☕', g: 'RS', price: 380 }),
+  T('prop',   { name: '대화 놀이터', icon: '💬', g: 'RS', price: 400 }),
+  T('prop',   { name: '협동 캠프', icon: '⛺', g: 'RS', price: 420 }),
+  T('donate', { name: '나눔 광장', icon: '💝' }),
+  T('prop',   { name: '선택의 갈림길', icon: '🧭', g: 'RD', price: 440 }),
+  T('chance', { name: '마음 찬스', icon: '🎁' }),
+  T('prop',   { name: '약속의 탑', icon: '🏰', g: 'RD', price: 460 }),
+  T('prop',   { name: '정의 법원', icon: '⚖️', g: 'RD', price: 480 }),
+  T('prop',   { name: '미래 설계소', icon: '🚀', g: 'RD', price: 520 })
+];
+
+const CHANCES = [
+  { t: 'gain', amt: 150, icon: '💪', text: '친구가 무거운 짐을 들 때 도와줬어요. 고마움 보너스!' },
+  { t: 'gain', amt: 100, icon: '🦁', text: '실수를 솔직하게 인정했어요. 용기 보너스!' },
+  { t: 'gain', amt: 100, icon: '🌏', text: '아무도 보지 않을 때 쓰레기를 주웠어요. 양심 보너스!' },
+  { t: 'lose', amt: 100, icon: '⏰', text: '친구와의 약속 시간에 늦었어요. 나눔 기금에 코인을 내요.' },
+  { t: 'lose', amt: 150, icon: '😤', text: '화가 나서 친구에게 소리를 질렀어요. 나눔 기금에 코인을 내요.' },
+  { t: 'lose', amt: 100, icon: '🙄', text: '게임에서 졌다고 짜증을 냈어요. 나눔 기금에 코인을 내요.' },
+  { t: 'mission', amt: 200, icon: '🎭', text: '감정 몸짓 챌린지! 지금 내 기분을 말없이 몸으로 표현해요. 친구들이 맞히면 성공!' },
+  { t: 'mission', amt: 150, icon: '🙏', text: '감사 3초 챌린지! 3초 안에 고마운 사람 3명을 말하면 성공!' },
+  { t: 'sorry', amt: 150, icon: '🏃', text: '복도에서 뛰다가 친구와 부딪혔어요. 진심을 담아 사과하는 말을 하면 벌금 면제!' },
+  { t: 'giveAll', amt: 50, icon: '💌', text: '깜짝 감사 편지! 다른 친구들에게 50코인씩 선물해요.' },
+  { t: 'getAll', amt: 50, icon: '🎂', text: '오늘은 나의 생일! 친구들에게 축하 선물로 50코인씩 받아요.' },
+  { t: 'goto', to: 0, icon: '🚩', text: '새로운 마음으로 다시 시작! 출발 칸으로 이동해요. (월급 받기)' },
+  { t: 'goto', to: 6, icon: '🌿', text: '조금 지쳤나요? 마음 쉼터로 이동해서 쉬어 가요.' },
+  { t: 'forward', n: 3, icon: '👣', text: '용기를 내서 앞으로 3칸 이동!' }
+];
+
+const EMOJIS = ['🐯', '🐰', '🐻', '🦊', '🐼', '🐸'];
+const COLORS = ['#e03131', '#1971c2', '#2f9e44', '#e8590c', '#7048e8', '#c2255c'];
+const RENT_RATE = [0, 0.5, 1.2, 2.0];   // 단계별 사용료 = 가격 × 비율
+const UP_RATE = 0.5;                    // 레벨업 비용 = 가격 × 0.5
+const DONATE = 100, PRAISE = 50;
+
+/* =========================================================
+   도우미
+   ========================================================= */
+const $ = s => document.querySelector(s);
+const r10 = n => Math.round(n / 10) * 10;
+const coin = n => `🪙 ${Number(n).toLocaleString()}코인`;
+const rnd6 = () => 1 + Math.floor(Math.random() * 6);
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const rentAt = (t, lv) => r10(t.price * RENT_RATE[lv]);
+const upCost = t => r10(t.price * UP_RATE);
+const stars = lv => '⭐'.repeat(lv) + '☆'.repeat(3 - lv);
+
+function gridPos(i) {
+  if (i <= 6) return [6, 6 - i];
+  if (i <= 12) return [12 - i, 0];
+  if (i <= 18) return [0, i - 12];
+  return [i - 18, 6];
+}
+
+let soundOn = true, AC = null;
+function beep(f = 600, d = 0.05, type = 'square', vol = 0.04) {
+  if (!soundOn) return;
+  try {
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.type = type; o.frequency.value = f; g.gain.value = vol;
+    o.connect(g); g.connect(AC.destination);
+    o.start(); g.gain.exponentialRampToValueAtTime(0.0001, AC.currentTime + d);
+    o.stop(AC.currentTime + d);
+  } catch (e) {}
+}
+const coinSound = () => { beep(880, .08, 'triangle', .06); setTimeout(() => beep(1320, .12, 'triangle', .06), 80); };
+
+/* =========================================================
+   설정 화면
+   ========================================================= */
+let count = 4;
+let names = ['1모둠', '2모둠', '3모둠', '4모둠', '5모둠', '6모둠'];
+let CFG = null, S = null;
+
+function renderSetup() {
+  $('#countBtns').innerHTML = [2, 3, 4, 5, 6].map(n =>
+    `<button class="${n === count ? 'on' : ''}" data-n="${n}">${n}명(팀)</button>`).join('');
+  $('#countBtns').querySelectorAll('button').forEach(b => b.onclick = () => { saveNames(); count = +b.dataset.n; renderSetup(); });
+  $('#nameInputs').innerHTML = Array.from({ length: count }, (_, i) =>
+    `<div class="nameRow"><div class="em" style="background:${COLORS[i]}">${EMOJIS[i]}</div>
+     <input type="text" maxlength="10" data-i="${i}" value="${esc(names[i])}" placeholder="이름"></div>`).join('');
+  $('#groupList').innerHTML = Object.values(GROUPS).map(g => `<span class="chip" style="background:${g.color}">${g.name}</span>`).join('');
+}
+function saveNames() {
+  document.querySelectorAll('#nameInputs input').forEach(inp => names[+inp.dataset.i] = inp.value.trim() || `${+inp.dataset.i + 1}모둠`);
+}
+$('#startBtn').onclick = () => {
+  saveNames();
+  CFG = {
+    names: names.slice(0, count),
+    startMoney: Math.max(100, +$('#startMoney').value || 2000),
+    salary: Math.max(0, +$('#salary').value || 0)
+  };
+  newGame(CFG);
+};
+function showSetup() { $('#game').hidden = true; $('#setup').hidden = false; S = null; renderSetup(); }
+
+/* =========================================================
+   게임 시작 / 보드 그리기
+   ========================================================= */
+function newGame(cfg) {
+  S = {
+    players: cfg.names.map((n, i) => ({ name: n, emoji: EMOJIS[i], color: COLORS[i], money: cfg.startMoney, pos: 0, bankrupt: false })),
+    cur: 0, phase: 'roll', fund: 0, doubles: 0, again: false,
+    deck: shuffle(CHANCES.slice())
+  };
+  TILES.forEach(t => { t.owner = null; t.level = 0; });
+  $('#setup').hidden = true; $('#game').hidden = false;
+  $('#log').innerHTML = '';
+  buildBoard();
+  renderDie($('#d1'), 1); renderDie($('#d2'), 1);
+  log('🎉 게임 시작! 서로 응원하며 즐겁게 해요.');
+  updateAll();
+}
+
+function buildBoard() {
+  const b = $('#board'); b.innerHTML = '';
+  TILES.forEach((t, i) => {
+    const el = document.createElement('div');
+    const [r, c] = gridPos(i);
+    el.style.gridRow = r + 1; el.style.gridColumn = c + 1;
+    el.className = 'tile ' + (t.type === 'prop' ? 'prop' : t.type === 'chance' ? 'chance' : 'corner');
+    el.id = 'tile' + i;
+    el.innerHTML = (t.type === 'prop' ? `<div class="band" style="background:${GROUPS[t.g].color}"></div>` : '') +
+      `<div class="tname"><span class="ticon">${t.icon}</span><span>${t.name}</span></div>
+       <div class="tinfo"></div><div class="tokens"></div>`;
+    el.onclick = () => showTileInfo(i);
+    b.appendChild(el);
+  });
+  const c = document.createElement('div');
+  c.className = 'center';
+  c.innerHTML = `
+    <div class="logo">🎲 마음 마블</div>
+    <div class="legend">${Object.values(GROUPS).map(g => `<span class="chip" style="background:${g.color}">${g.name}</span>`).join('')}</div>
+    <div id="turnInfo" class="turn"></div>
+    <div class="dice"><div class="die" id="d1"></div><div class="die" id="d2"></div></div>
+    <div id="rollMsg" class="rollmsg">주사위를 굴려 주세요 (스페이스바도 가능)</div>
+    <button id="rollBtn" class="btn primary roll">🎲 주사위 굴리기</button>
+    <div class="cbar"><span id="fundInfo"></span>
+      <button id="soundBtn" class="mini">${soundOn ? '🔊' : '🔇'}</button>
+      <button id="endBtn" class="mini">게임 끝내기</button></div>
+    <div id="toast" class="toast"></div>`;
+  b.appendChild(c);
+  $('#rollBtn').onclick = roll;
+  $('#soundBtn').onclick = () => { soundOn = !soundOn; $('#soundBtn').textContent = soundOn ? '🔊' : '🔇'; };
+  $('#endBtn').onclick = () => {
+    if (S.phase !== 'roll') return;
+    modal('게임을 끝낼까요?', '<div class="hint">지금까지의 총자산(코인 + 장소 가치)으로 순위를 정해요.</div>',
+      [{ label: '계속하기' }, { label: '게임 끝내기', cls: 'primary', onClick: gameOver }]);
+  };
+}
+
+function renderDie(el, v) {
+  const pips = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] }[v];
+  el.innerHTML = Array.from({ length: 9 }, (_, i) => `<span class="${pips.includes(i) ? 'pip' : ''}"></span>`).join('');
+}
+
+/* =========================================================
+   화면 갱신
+   ========================================================= */
+function assets(pi) {
+  return S.players[pi].money + TILES.reduce((s, t) => t.owner === pi ? s + t.price + (t.level - 1) * upCost(t) : s, 0);
+}
+
+function updateAll() { updateBoard(); updatePlayers(); updateCenter(); }
+
+function updateBoard() {
+  const curPos = S.players[S.cur].pos;
+  TILES.forEach((t, i) => {
+    const el = $('#tile' + i);
+    const info = el.querySelector('.tinfo');
+    el.classList.toggle('active', i === curPos && S.phase !== 'over');
+    if (t.type === 'prop') {
+      const owned = t.owner != null;
+      el.classList.toggle('owned', owned);
+      if (owned) {
+        el.style.setProperty('--oc', S.players[t.owner].color);
+        info.textContent = `${S.players[t.owner].emoji}${'⭐'.repeat(t.level)} ${rentAt(t, t.level)}`;
+      } else {
+        info.textContent = `🪙${t.price}`;
+      }
+    } else {
+      info.textContent = {
+        start: `월급 +${CFG.salary}`, rest: `기금 🪙${S.fund}`, donate: `기부 -${DONATE}`,
+        praise: `칭찬 선물`, chance: '카드 뽑기'
+      }[t.type];
+    }
+    el.querySelector('.tokens').innerHTML = S.players.map(p =>
+      (!p.bankrupt && p.pos === i) ? `<div class="token" style="background:${p.color}">${p.emoji}</div>` : '').join('');
+  });
+}
+
+function updatePlayers() {
+  $('#players').innerHTML = S.players.map((p, i) => {
+    const props = TILES.filter(t => t.owner === i).length;
+    return `<div class="pcard ${i === S.cur && S.phase !== 'over' ? 'cur' : ''} ${p.bankrupt ? 'bk' : ''}" style="--pc:${p.color}">
+      <div class="pe">${p.emoji}</div>
+      <div><div class="pn">${esc(p.name)}${p.bankrupt ? ' (파산)' : ''}</div>
+      <div class="pm">${coin(p.money)}</div>
+      <div class="pa">🏠 ${props}곳 · 총자산 ${coin(assets(i))}</div></div></div>`;
+  }).join('<div style="height:8px"></div>');
+}
+
+function updateCenter() {
+  const p = S.players[S.cur];
+  const ti = $('#turnInfo');
+  ti.style.background = p.color;
+  ti.textContent = S.phase === 'over' ? '게임 끝!' : `${p.emoji} ${p.name}의 차례`;
+  $('#rollBtn').disabled = S.phase !== 'roll';
+  $('#fundInfo').textContent = `💝 나눔 기금 🪙${S.fund}`;
+}
+
+function log(msg) {
+  const d = document.createElement('div');
+  d.innerHTML = msg;
+  $('#log').prepend(d);
+}
+
+let toastTimer;
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+/* =========================================================
+   모달
+   ========================================================= */
+function modal(title, html, buttons) {
+  $('#mTitle').innerHTML = title;
+  $('#mBody').innerHTML = html;
+  const box = $('#mBtns'); box.innerHTML = '';
+  buttons.forEach(b => {
+    const e = document.createElement('button');
+    e.className = 'btn ' + (b.cls || '');
+    e.textContent = b.label;
+    e.disabled = !!b.disabled;
+    e.onclick = () => { closeModal(); b.onClick && b.onClick(); };
+    box.appendChild(e);
+  });
+  $('#modalBg').hidden = false;
+}
+function closeModal() { $('#modalBg').hidden = true; }
+
+function showTileInfo(i) {
+  if (!S || S.phase !== 'roll') return;
+  const t = TILES[i];
+  if (t.type !== 'prop') {
+    const desc = {
+      start: `이 칸을 지나가면 월급 ${coin(CFG.salary)}을 받아요.`,
+      rest: `도착하면 모인 나눔 기금(${coin(S.fund)})을 모두 받아요.`,
+      donate: `도착하면 나눔 기금에 ${coin(DONATE)}을 기부해요.`,
+      praise: `도착하면 친구들에게 칭찬 한마디와 ${coin(PRAISE)}씩을 받아요.`,
+      chance: '도착하면 마음 찬스 카드를 한 장 뽑아요.'
+    }[t.type];
+    return modal(`${t.icon} ${t.name}`, `<div class="hint">${desc}</div>`, [{ label: '닫기', cls: 'primary' }]);
+  }
+  const g = GROUPS[t.g];
+  const owner = t.owner != null ? `${S.players[t.owner].emoji} ${esc(S.players[t.owner].name)} (${t.level}단계)` : '아직 없음';
+  modal(`${t.icon} ${t.name}`,
+    `<div class="badge" style="background:${g.color}">${g.name}</div>
+     <table class="info">
+       <tr><td>점유 가격</td><td><b>${coin(t.price)}</b></td></tr>
+       <tr><td>레벨업 비용</td><td><b>${coin(upCost(t))}</b></td></tr>
+       <tr><td>사용료 1단계</td><td>${coin(rentAt(t, 1))}</td></tr>
+       <tr><td>사용료 2단계</td><td>${coin(rentAt(t, 2))}</td></tr>
+       <tr><td>사용료 3단계</td><td>${coin(rentAt(t, 3))}</td></tr>
+       <tr><td>소유자</td><td>${owner}</td></tr>
+     </table>`, [{ label: '닫기', cls: 'primary' }]);
+}
+
+/* =========================================================
+   주사위 & 이동
+   ========================================================= */
+function roll() {
+  if (!S || S.phase !== 'roll' || !$('#modalBg').hidden) return;
+  S.phase = 'rolling'; updateCenter();
+  const e1 = $('#d1'), e2 = $('#d2');
+  e1.classList.add('rolling'); e2.classList.add('rolling');
+  let k = 0;
+  const iv = setInterval(() => {
+    renderDie(e1, rnd6()); renderDie(e2, rnd6());
+    beep(300 + Math.random() * 400, .03);
+    if (++k >= 11) {
+      clearInterval(iv);
+      e1.classList.remove('rolling'); e2.classList.remove('rolling');
+      const a = rnd6(), b = rnd6(), dbl = a === b;
+      renderDie(e1, a); renderDie(e2, b);
+      if (dbl) S.doubles++;
+      S.again = dbl && S.doubles < 3;
+      const p = S.players[S.cur];
+      $('#rollMsg').textContent = `${a} + ${b} = ${a + b}칸 이동!${dbl ? ' 🎉 더블!' : ''}`;
+      log(`🎲 ${esc(p.name)}: ${a}+${b}=${a + b}${dbl ? ' (더블)' : ''}`);
+      S.phase = 'moving';
+      moveSteps(S.cur, a + b, resolve);
+    }
+  }, 70);
+}
+
+function moveSteps(pi, n, cb) {
+  const p = S.players[pi];
+  let k = 0;
+  const iv = setInterval(() => {
+    p.pos = (p.pos + 1) % TILES.length;
+    beep(650, .03, 'triangle');
+    if (p.pos === 0) {
+      p.money += CFG.salary;
+      coinSound();
+      toast(`💰 ${p.name} 월급 +${CFG.salary}`);
+      log(`💰 ${esc(p.name)} 한 바퀴 완주! 월급 ${coin(CFG.salary)}`);
+    }
+    updateAll();
+    if (++k >= n) { clearInterval(iv); setTimeout(cb, 300); }
+  }, 210);
+}
+
+/* =========================================================
+   도착 칸 처리
+   ========================================================= */
+function resolve() {
+  S.phase = 'resolve'; updateCenter();
+  const pi = S.cur, p = S.players[pi], t = TILES[p.pos];
+  switch (t.type) {
+    case 'start': toast('🚩 출발 칸 도착!'); return endTurn();
+    case 'prop':
+      if (t.owner == null) return missionFlow();
+      if (t.owner === pi) return upgradeFlow();
+      return rentFlow();
+    case 'chance': return chanceFlow();
+    case 'rest': return restFlow();
+    case 'praise': return praiseFlow();
+    case 'donate': return donateFlow();
+  }
+}
+
+function missionFlow() {
+  const p = S.players[S.cur], t = TILES[p.pos], g = GROUPS[t.g];
+  const m = pick(MISSIONS[t.g]);
+  modal(`${t.icon} ${t.name}`,
+    `<div class="badge" style="background:${g.color}">${g.name} 미션</div>
+     <div class="mission">${m}</div>
+     <div class="hint">미션에 성공하면 ${coin(t.price)}으로 이곳을 점유할 수 있어요.<br>성공 여부는 친구들과 함께 판정해요!</div>`,
+    [
+      { label: '🔄 다른 미션', onClick: missionFlow },
+      { label: '😅 다음에 도전', onClick: () => { log(`😅 ${esc(p.name)} ${t.name} 미션 다음 기회에!`); endTurn(); } },
+      { label: '👍 미션 성공!', cls: 'primary', onClick: () => { coinSound(); log(`✅ ${esc(p.name)} ${t.name} 미션 성공!`); buyFlow(); } }
+    ]);
+}
+
+function buyFlow() {
+  const pi = S.cur, p = S.players[pi], t = TILES[p.pos];
+  if (p.money < t.price) {
+    return modal('😢 코인이 부족해요',
+      `<div class="mission">미션은 멋지게 성공했지만<br>점유하려면 ${coin(t.price)}이 필요해요.</div>
+       <div class="hint">지금 가진 코인: ${coin(p.money)}</div>`,
+      [{ label: '확인', cls: 'primary', onClick: endTurn }]);
+  }
+  modal(`🏁 ${t.name} 점유하기`,
+    `<div class="mission">${coin(t.price)}을 내고<br>이곳을 점유할까요?</div>
+     <div class="hint">점유하면 친구가 올 때마다 사용료 ${coin(rentAt(t, 1))}을 받아요.<br>
+     지금 코인: ${coin(p.money)} → ${coin(p.money - t.price)}</div>`,
+    [
+      { label: '안 살래요', onClick: () => { log(`${esc(p.name)} ${t.name} 점유 안 함`); endTurn(); } },
+      { label: '🏠 점유하기!', cls: 'primary', onClick: () => {
+          p.money -= t.price; t.owner = pi; t.level = 1;
+          coinSound(); toast(`🏠 ${p.name} ${t.name} 점유!`);
+          log(`🏠 ${esc(p.name)} <b>${t.name}</b> 점유! (1단계)`);
+          endTurn();
+        } }
+    ]);
+}
+
+function upgradeFlow() {
+  const pi = S.cur, p = S.players[pi], t = TILES[p.pos];
+  if (t.level >= 3) {
+    return modal(`👑 ${t.name}`,
+      `<div class="lvl">${stars(3)}</div><div class="mission">이미 최고 단계(3단계)예요!</div>
+       <div class="hint">친구가 오면 사용료 ${coin(rentAt(t, 3))}을 받아요.</div>`,
+      [{ label: '확인', cls: 'primary', onClick: endTurn }]);
+  }
+  const cost = upCost(t), next = t.level + 1, can = p.money >= cost;
+  modal(`⬆️ ${t.name} 레벨업`,
+    `<div class="lvl">${stars(t.level)} → ${stars(next)}</div>
+     <div class="mission">${coin(cost)}을 내고<br>${next}단계로 레벨업할까요?</div>
+     <div class="hint">사용료: ${coin(rentAt(t, t.level))} → <b>${coin(rentAt(t, next))}</b><br>
+     지금 코인: ${coin(p.money)}${can ? '' : ' (코인이 부족해요)'}</div>`,
+    [
+      { label: '다음에', onClick: endTurn },
+      { label: '⬆️ 레벨업!', cls: 'primary', disabled: !can, onClick: () => {
+          p.money -= cost; t.level = next;
+          coinSound(); toast(`⬆️ ${t.name} ${next}단계!`);
+          log(`⬆️ ${esc(p.name)} <b>${t.name}</b> ${next}단계 레벨업!`);
+          endTurn();
+        } }
+    ]);
+}
+
+function rentFlow() {
+  const pi = S.cur, p = S.players[pi], t = TILES[p.pos], o = S.players[t.owner];
+  const rent = rentAt(t, t.level);
+  modal('💸 사용료 내기',
+    `<div class="mission"><b>${o.emoji} ${esc(o.name)}</b>의 <b>${t.name}</b>에 도착했어요.<br>${stars(t.level)} (${t.level}단계)</div>
+     <div class="bigcoin">${coin(rent)}</div>
+     <div class="hint">사용료를 내며 "${esc(o.name)}, 잘 쓰고 갈게!" 하고 인사해요 😊<br>
+     ${p.money < rent ? '<b style="color:#e03131">코인이 부족해요! 가진 코인을 모두 내고 파산해요.</b>' : `지금 코인: ${coin(p.money)} → ${coin(p.money - rent)}`}</div>`,
+    [{ label: '사용료 내기', cls: 'primary', onClick: () => {
+        const ok = pay(pi, rent, t.owner);
+        coinSound();
+        log(`💸 ${esc(p.name)} → ${esc(o.name)} 사용료 ${coin(rent)} (${t.name})`);
+        afterPay(ok, pi, endTurn);
+      } }]);
+}
+
+function restFlow() {
+  const p = S.players[S.cur], amt = S.fund;
+  modal('🌿 마음 쉼터',
+    `<div class="mission">잠시 쉬어 가요.<br>깊게 숨을 한 번 쉬고, 지금 내 기분을 한 단어로 말해 보세요.</div>
+     <div class="hint">${amt > 0 ? `모인 나눔 기금 <b>${coin(amt)}</b>을 모두 받아요!` : '나눔 기금이 아직 비어 있어요.'}</div>`,
+    [{ label: amt > 0 ? '기금 받기' : '확인', cls: 'primary', onClick: () => {
+        if (amt > 0) { p.money += amt; S.fund = 0; coinSound(); log(`🌿 ${esc(p.name)} 나눔 기금 ${coin(amt)} 받음`); }
+        endTurn();
+      } }]);
+}
+
+function praiseFlow() {
+  const pi = S.cur, p = S.players[pi];
+  modal('👏 칭찬 릴레이',
+    `<div class="mission">다른 친구들이 차례로<br><b>${esc(p.name)}</b>에게 칭찬 한마디씩 해 주세요!</div>
+     <div class="hint">칭찬 선물로 친구들에게 ${coin(PRAISE)}씩 받아요.</div>`,
+    [{ label: '칭찬 완료! 선물 받기', cls: 'primary', onClick: () => {
+        let sum = 0;
+        S.players.forEach((q, j) => {
+          if (j !== pi && !q.bankrupt) { const g = Math.min(PRAISE, q.money); q.money -= g; sum += g; }
+        });
+        p.money += sum; coinSound();
+        log(`👏 ${esc(p.name)} 칭찬 릴레이로 ${coin(sum)} 받음`);
+        endTurn();
+      } }]);
+}
+
+function donateFlow() {
+  const pi = S.cur, p = S.players[pi];
+  modal('💝 나눔 광장',
+    `<div class="mission">나눔 기금에 ${coin(DONATE)}을 기부해요.</div>
+     <div class="hint">모인 기금은 <b>마음 쉼터</b>에 도착한 친구가 받아요.</div>`,
+    [{ label: '기부하기', cls: 'primary', onClick: () => {
+        const ok = pay(pi, DONATE, 'fund');
+        log(`💝 ${esc(p.name)} 나눔 기금에 기부`);
+        afterPay(ok, pi, endTurn);
+      } }]);
+}
+
+function chanceFlow() {
+  if (!S.deck.length) S.deck = shuffle(CHANCES.slice());
+  const c = S.deck.pop(), pi = S.cur, p = S.players[pi];
+  const show = btns => modal('🎁 마음 찬스', `<div class="cicon">${c.icon}</div><div class="mission">${c.text}</div>`, btns);
+  const others = () => S.players.map((q, j) => j).filter(j => j !== pi && !S.players[j].bankrupt);
+
+  switch (c.t) {
+    case 'gain':
+      return show([{ label: `${coin(c.amt)} 받기`, cls: 'primary', onClick: () => {
+        p.money += c.amt; coinSound(); log(`🎁 ${esc(p.name)} +${c.amt}`); endTurn(); } }]);
+    case 'lose':
+      return show([{ label: `나눔 기금에 ${coin(c.amt)} 내기`, cls: 'primary', onClick: () => {
+        const ok = pay(pi, c.amt, 'fund'); log(`🎁 ${esc(p.name)} -${c.amt} (나눔 기금으로)`); afterPay(ok, pi, endTurn); } }]);
+    case 'mission':
+      return show([
+        { label: '😅 아쉽게 실패', onClick: endTurn },
+        { label: `👍 성공! ${coin(c.amt)} 받기`, cls: 'primary', onClick: () => {
+          p.money += c.amt; coinSound(); log(`🎁 ${esc(p.name)} 찬스 미션 성공 +${c.amt}`); endTurn(); } }]);
+    case 'sorry':
+      return show([
+        { label: `벌금 ${coin(c.amt)} 내기`, onClick: () => {
+          const ok = pay(pi, c.amt, 'fund'); log(`🎁 ${esc(p.name)} 벌금 -${c.amt}`); afterPay(ok, pi, endTurn); } },
+        { label: '🙏 사과 완료! 벌금 면제', cls: 'primary', onClick: () => { log(`🙏 ${esc(p.name)} 진심 사과로 벌금 면제`); endTurn(); } }]);
+    case 'giveAll':
+      return show([{ label: '선물하기', cls: 'primary', onClick: () => {
+        let ok = true;
+        others().forEach(j => { if (ok) ok = pay(pi, c.amt, j); });
+        log(`💌 ${esc(p.name)} 친구들에게 감사 선물`); afterPay(ok, pi, endTurn); } }]);
+    case 'getAll':
+      return show([{ label: '선물 받기', cls: 'primary', onClick: () => {
+        let sum = 0;
+        others().forEach(j => { const q = S.players[j], g = Math.min(c.amt, q.money); q.money -= g; sum += g; });
+        p.money += sum; coinSound(); log(`🎂 ${esc(p.name)} 생일 선물 ${coin(sum)} 받음`); endTurn(); } }]);
+    case 'goto':
+      return show([{ label: '이동하기', cls: 'primary', onClick: () => {
+        const n = (c.to - p.pos + TILES.length) % TILES.length;
+        if (n === 0) return resolve();
+        S.phase = 'moving'; moveSteps(pi, n, resolve); } }]);
+    case 'forward':
+      return show([{ label: '이동하기', cls: 'primary', onClick: () => {
+        S.phase = 'moving'; moveSteps(pi, c.n, resolve); } }]);
+  }
+}
+
+/* =========================================================
+   돈 / 파산 / 턴 / 게임 종료
+   ========================================================= */
+// to: 플레이어 번호 | 'fund'(나눔 기금) | null(은행)
+function pay(pi, amt, to) {
+  const p = S.players[pi], paid = Math.min(p.money, amt);
+  p.money -= paid;
+  if (typeof to === 'number') S.players[to].money += paid;
+  else if (to === 'fund') S.fund += paid;
+  if (paid < amt) { goBankrupt(pi); return false; }
+  return true;
+}
+
+function goBankrupt(pi) {
+  const p = S.players[pi];
+  p.bankrupt = true; p.money = 0;
+  TILES.forEach(t => { if (t.owner === pi) { t.owner = null; t.level = 0; } });
+  log(`💥 <b>${esc(p.name)} 파산!</b> 소유한 장소가 모두 비었어요.`);
+}
+
+function afterPay(ok, pi, next) {
+  updateAll();
+  if (ok) return next();
+  beep(200, .4, 'sawtooth', .05);
+  const p = S.players[pi];
+  modal('💥 파산',
+    `<div class="cicon">${p.emoji}</div>
+     <div class="mission">${esc(p.name)}의 코인이 모두 떨어졌어요.</div>
+     <div class="hint">하지만 괜찮아요! 끝까지 친구들을 응원해 주세요 💪<br>가지고 있던 장소는 모두 빈 땅이 돼요.</div>`,
+    [{ label: '확인', cls: 'primary', onClick: next }]);
+}
+
+function endTurn() {
+  updateAll();
+  const alive = S.players.filter(p => !p.bankrupt);
+  if (alive.length <= 1) return gameOver();
+  const p = S.players[S.cur];
+  if (S.again && !p.bankrupt) {
+    S.again = false; S.phase = 'roll';
+    toast(`🎲 더블! ${p.name} 한 번 더!`);
+    $('#rollMsg').textContent = '더블! 한 번 더 굴려요';
+    return updateAll();
+  }
+  S.again = false; S.doubles = 0;
+  do { S.cur = (S.cur + 1) % S.players.length; } while (S.players[S.cur].bankrupt);
+  S.phase = 'roll';
+  $('#rollMsg').textContent = '주사위를 굴려 주세요';
+  updateAll();
+}
+
+function gameOver() {
+  S.phase = 'over';
+  const ranks = S.players.map((p, i) => ({ p, a: assets(i) }))
+    .sort((x, y) => (x.p.bankrupt - y.p.bankrupt) || (y.a - x.a));
+  const medals = ['🥇', '🥈', '🥉'];
+  const html = ranks.map((r, k) =>
+    `<div class="rank"><span>${medals[k] || (k + 1) + '위'}</span><span>${r.p.emoji} ${esc(r.p.name)}</span>
+     <span>${r.p.bankrupt ? '파산' : coin(r.a)}</span></div>`).join('') +
+    `<div class="hint" style="margin-top:14px">💭 <b>이야기 나누기</b><br>오늘 가장 기억에 남는 미션은 무엇인가요?<br>게임을 하면서 어떤 마음이 들었나요?</div>`;
+  coinSound(); setTimeout(coinSound, 200);
+  log(`🏆 ${esc(ranks[0].p.name)} 승리!`);
+  updateAll();
+  modal(`🏆 ${ranks[0].p.emoji} ${esc(ranks[0].p.name)} 승리!`, html, [
+    { label: '처음 화면으로', onClick: showSetup },
+    { label: '같은 멤버로 다시', cls: 'primary', onClick: () => newGame(CFG) }
+  ]);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space' && S && S.phase === 'roll' && $('#modalBg').hidden && document.activeElement.tagName !== 'INPUT') {
+    e.preventDefault(); roll();
+  }
+});
+
+renderSetup();
+</script>
+</body>
+</html>
+
+</body></html>
